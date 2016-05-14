@@ -5,7 +5,8 @@ var MAX_LINES = 5000;
 module.exports = function(map, generatedCode, sources) {
 	var generatedSide = [];
 	var originalSide = [];
-	var mappingsSide = [];
+    var mappingsSide = [];
+    var span_id_counter = 0;
 
 	function addTo(side, line, html) {
 		side[line] = (side[line] || "") + html;
@@ -29,7 +30,8 @@ module.exports = function(map, generatedCode, sources) {
 			attrs["data-source"] = options.source;
 			attrs["data-line"] = options.line;
 			attrs["data-column"] = options.column;
-		}
+        }
+        attrs["id"] = "span_" + ++span_id_counter;
 		return "<span " + Object.keys(attrs).filter(function(key) {
 			return typeof attrs[key] !== "undefined";
 		}).map(function(key) {

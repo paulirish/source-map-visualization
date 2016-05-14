@@ -18,7 +18,10 @@ $(function() {
 	});
 
 	$(window).hashchange(function() {
-		var exampleKind = window.location.hash.replace(/^#/, "");
+        var exampleKind = window.location.hash.replace(/^#/, "").replace(/\#.*/, "");
+        var spanid = window.location.hash.match(/^#\w+#(.*)/);
+
+        if (spanid) scrollToSpan(spanid);
 
 		if(exampleKind !== "custom-choose")
 			$(".custom-modal").modal("hide");
@@ -291,7 +294,7 @@ $(function() {
 			visu.html(results.files);
 			footer.prepend(results.mappings);
 			
-			$("body").delegate(".original-item, .generated-item, .mapping-item", "mouseenter", function() {
+			$("body").delegate(".original-item, .generated-item, .mapping-item", "mouseenter", function(e, data) {
 				$(".selected").removeClass("selected");
 				var mappedItems = $(this).data('mapped');
 				if (!mappedItems){
@@ -300,9 +303,9 @@ $(function() {
 					var column = $(this).data("column");
 					mappedItems = $(".item-" + source + "-" + line + "-" + column);
 					$(this).data('mapped', mappedItems)
-				}
+                }
                 $(mappedItems).addClass("selected");
-                var elems = $(mappedItems).not(this).get();
+                var elems = $(mappedItems).not(data && data.scrollToSameElement ? false : this).get();
 				if (elems.length) {
 					elems.forEach(function (elem) {
 						if ('scrollIntoViewIfNeeded' in elem)
@@ -350,6 +353,17 @@ $(function() {
 		}
 	}
 });
+
+function scrollToSpan(spanid) {
+    var id = spanid.length && spanid[1];
+    if (!id) return;
+    setTimeout(function () {
+        var event = jQuery.Event('mouseenter');
+        var $delegate = $("body");
+        event.target = $delegate.find('#' + id)[0];
+        $delegate.trigger(event, { scrollToSameElement: true });
+    }, 100);    
+}
 
 function readFile(file, callback) {
 	var fileReader = new FileReader();
