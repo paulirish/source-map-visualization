@@ -13,7 +13,7 @@ module.exports = {
 			{ test: /\.json$/, loader: "json-loader" },
 			{ test: /\.jade$/, loader: "jade-loader" },
 			{ test: /\.css$/,  loader: "style-loader!css-loader" },
-			{ test: /\.less$/,  loader: "style-loader!css-loader!less-loader" },
+			{ test: /\.less$/,  loader: "style-loader!css-loader!less-loader?{sourceMap:{}}" },
 			{ test: /\.png$/,  loader: "url-loader?limit=5000&minetype=image/png" }
 		]
 	},
