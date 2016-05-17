@@ -13,6 +13,7 @@
   "author": "Tobias Koppers @sokra",
   "license": "MIT",
   "devDependencies": {
+    "extract-text-webpack-plugin": "^1.0.1",
     "gh-pages": "^0.8.0",
     "html-webpack-plugin": "^2.7.2",
     "webpack": "^1.12.12",
