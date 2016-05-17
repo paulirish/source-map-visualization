@@ -14,7 +14,7 @@ module.exports = {
 			{ test: /\.json$/, loader: "json-loader" },
 			{ test: /\.jade$/, loader: "jade-loader" },
 			{ test: /\.css$/,  loader: ExtractTextPlugin.extract("style-loader", "css-loader?sourceMap") },
-			{ test: /\.less$/,  loader: ExtractTextPlugin.extract("style-loader", "css-loader!less-loader?sourceMap") },
+			{ test: /\.less$/,  loader: ExtractTextPlugin.extract("style-loader", "css-loader?sourceMap!less-loader?sourceMap") },
 			{ test: /\.png$/,  loader: "url-loader?limit=5000&minetype=image/png" }
 		]
 	},
