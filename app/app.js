@@ -6,6 +6,15 @@ var generateHtml = require("./generateHtml");
 var exampleKinds = ["coffee", "simple-coffee", "typescript", "babel", "raven", "sass", "less"];
 var SOURCE_MAPPING_URL_REG_EXP = /\/\/[@#]\s*sourceMappingURL\s*=\s*data:[^\n]*?base64,([^\n]*)/;
 var SOURCE_MAPPING_URL_REG_EXP2 = /\/\*\s*[@#]\s*sourceMappingURL\s*=\s*data:[^\n]*?base64,([^\n]*)\s*\*\//;
+var htmlEscapes = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#x27;',
+  '/': '&#x2F;'
+};
+var htmlEscaper = /[&<>"'\/]/g;
 
 $(function() {
 	require("bootstrap");
@@ -290,10 +299,16 @@ $(function() {
 			exampleMap.file = exampleMap.file || "example.js";
 			var map = new SourceMap.SourceMapConsumer(exampleMap);
 
-			var results = generateHtml(map, exampleJs, sources); 
+			sources = sources.map(function (it) {
+				return it.replace(htmlEscaper, function(match) {
+				    return htmlEscapes[match];
+				 });
+			});
+
+			var results = generateHtml(map, exampleJs, sources);
 			visu.html(results.files);
 			footer.prepend(results.mappings);
-			
+
 			$("body").delegate(".original-item, .generated-item, .mapping-item", "mouseenter", function(e, data) {
 				$(".selected").removeClass("selected");
 				var mappedItems = $(this).data('mapped');
@@ -312,7 +327,7 @@ $(function() {
 							return elem.scrollIntoViewIfNeeded();
 						elem.scrollIntoView({behavior: 'smooth'})
 					})
-				}	
+				}
 
 			}).delegate(".original-item, .generated-item, .mapping-item", "click", function() {
 				var mappedItems = $(this).data('mapped');
@@ -323,7 +338,7 @@ $(function() {
 							return elem.scrollIntoViewIfNeeded();
 						elem.scrollIntoView({behavior: 'smooth'})
 					})
-				}	
+				}
 			});
 
 			$('header p .btn-primary').off('click').click(function() {
@@ -362,7 +377,7 @@ function scrollToSpan(spanid) {
         var $delegate = $("body");
         event.target = $delegate.find('#' + id)[0];
         $delegate.trigger(event, { scrollToSameElement: true });
-    }, 100);    
+    }, 100);
 }
 
 function readFile(file, callback) {
