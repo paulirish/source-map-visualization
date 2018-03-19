@@ -282,60 +282,67 @@ $(function() {
 		}).join(",")).text("Link to this");
 	}
 	function loadExample(sources, exampleJs, exampleMap) {
+		console.time('run visualize ');
 		var visu = $("main").hide().text("");
 		var footer = $("footer")
 
 		try {
 			exampleMap.file = exampleMap.file || "example.js";
-			var map = new SourceMap.SourceMapConsumer(exampleMap);
+			// wasm sourcemaps for speed
+			SourceMap.SourceMapConsumer.initialize({ 'lib/mappings.wasm': './node_modules/source-map/lib/mappings.wasm' });
 
-			var results = generateHtml(map, exampleJs, sources);
-			visu.html(results.files);
-			footer.prepend(results.mappings);
+			return new SourceMap.SourceMapConsumer(exampleMap).then(function(map) {
+				var results = generateHtml(map, exampleJs, sources);
+				visu.html(results.files);
+				footer.prepend(results.mappings);
 
-			$("body").delegate(".original-item, .generated-item, .mapping-item", "mouseenter", function() {
-				$(".selected").removeClass("selected");
-				var mappedItems = $(this).data('mapped');
-				if (!mappedItems){
-					var source = $(this).data("source");
-					var line = $(this).data("line");
-					var column = $(this).data("column");
-					mappedItems = $(".item-" + source + "-" + line + "-" + column);
-					$(this).data('mapped', mappedItems)
-				}
-				$(mappedItems).addClass("selected");
+				$("body").delegate(".original-item, .generated-item, .mapping-item", "mouseenter", function() {
+					$(".selected").removeClass("selected");
+					var mappedItems = $(this).data('mapped');
+					if (!mappedItems){
+						var source = $(this).data("source");
+						var line = $(this).data("line");
+						var column = $(this).data("column");
+						mappedItems = $(".item-" + source + "-" + line + "-" + column);
+						$(this).data('mapped', mappedItems)
+					}
+					$(mappedItems).addClass("selected");
 
-			}).delegate(".original-item, .generated-item, .mapping-item", "click", function() {
-				var mappedItems = $(this).data('mapped');
-				var elems = $(mappedItems).not(this).get();
-				if (elems.length) {
-					elems.forEach(function (elem) {
-						if ('scrollIntoViewIfNeeded' in elem)
-							return elem.scrollIntoViewIfNeeded();
-						elem.scrollIntoView({behavior: 'smooth'})
-					})
-				}
-			});
-
-			$('header p .js-minify').off('click').click(function() {
-				var result = UglifyJS.minify(exampleJs, {
-					outSourceMap: "example.map",
-					output: {
-						beautify: true
+				}).delegate(".original-item, .generated-item, .mapping-item", "click", function() {
+					var mappedItems = $(this).data('mapped');
+					var elems = $(mappedItems).not(this).get();
+					if (elems.length) {
+						elems.forEach(function (elem) {
+							if ('scrollIntoViewIfNeeded' in elem)
+								return elem.scrollIntoViewIfNeeded();
+							elem.scrollIntoView({behavior: 'smooth'})
+						})
 					}
 				});
-				var minmap = JSON.parse(result.map);
-				minmap.file = "example";
-				minmap = new SourceMap.SourceMapConsumer(result.map);
-				minmap = SourceMap.SourceMapGenerator.fromSourceMap(minmap);
-				minmap.setSourceContent("?", exampleJs);
-				map.sourcesContent = sources;
-				minmap.applySourceMap(map, "?");
-				minmap = minmap.toJSON();
-				var idx = minmap.sources.indexOf("?");
 
-				loadExample(minmap.sourcesContent, result.code, minmap);
-				oldHash = window.location.hash = "custom";
+				$('header p .js-minify').off('click').click(function() {
+					var result = UglifyJS.minify(exampleJs, {
+						outSourceMap: "example.map",
+						output: {
+							beautify: true
+						}
+					});
+					var minmap = JSON.parse(result.map);
+					minmap.file = "example";
+					new SourceMap.SourceMapConsumer(result.map).then(function(minmap){
+						minmap = SourceMap.SourceMapGenerator.fromSourceMap(minmap);
+						minmap.setSourceContent("?", exampleJs);
+						map.sourcesContent = sources;
+						minmap.applySourceMap(map, "?");
+						minmap = minmap.toJSON();
+						var idx = minmap.sources.indexOf("?");
+
+						loadExample(minmap.sourcesContent, result.code, minmap);
+						oldHash = window.location.hash = "custom";
+					});
+				});
+
+				console.timeEnd('run visualize ');
 			});
 		} catch(e) {
 			throw e;
@@ -344,6 +351,8 @@ $(function() {
 		}
 	}
 });
+
+
 
 function readFile(file, callback) {
 	var fileReader = new FileReader();

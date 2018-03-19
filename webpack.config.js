@@ -6,8 +6,11 @@ module.exports = {
 	entry: "./app/app.js",
 	output: {
 		path: path.join(__dirname, "build"),
-		filename: "bundle.js"
+		filename: "bundle.js",
 	},
+	externals: [
+		"fs",
+	],
 	module: {
 		loaders: [
 			{ test: /\.json$/, loader: "json-loader" },

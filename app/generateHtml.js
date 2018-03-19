@@ -9,7 +9,7 @@ function sanitize(text) {
 	return escapeHTML(text);
 }
 
-module.exports = function(map, generatedCode, sources) {
+function generateHTML(map, generatedCode, sources) {
 	var generatedSide = [];
 	var originalSide = [];
 	var mappingsSide = [];
@@ -47,7 +47,9 @@ module.exports = function(map, generatedCode, sources) {
 	var mapSources = map.sources;
 
 	var generatedLine = 1;
+	console.time('read sourcemap');
 	var nodes = SourceMap.SourceNode.fromStringWithSourceMap(generatedCode, map).children;
+	console.timeEnd('read sourcemap');
 	nodes.forEach(function(item, idx) {
 		if(generatedLine > MAX_LINES) return;
 		if(typeof item === "string") {
@@ -263,3 +265,5 @@ module.exports = function(map, generatedCode, sources) {
         mappings: mappingsSideElem + "</tbody></table></code></pre></div>"
     };
 }
+
+module.exports = generateHTML;
